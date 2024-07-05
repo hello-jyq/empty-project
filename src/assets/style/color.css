@@ -1,0 +1,27 @@
+/* 颜色定义 例："#ffffff" --> "--c-ffffff" */
+:root {
+  --c-ffffff: #ffffff;
+  --c-666666: #666666;
+  --c-000000: #000000;
+  --c-f2f2f2: #f2f2f2;
+  --c-f8f8f8: #f8f8f8;
+  --c-99ffcc: #ccffcc;
+  --c-003300: #003300;
+}
+
+/* 默认颜色name */
+ body[theme='light'] {
+    --color-background: var(--c-f2f2f2);
+    --color-text: var(--c-000000);
+    --color-header-background: var(--c-ffffff);
+    --color-menu-background: var(--c-99ffcc);
+  }
+/* 暗黑颜色name */
+body[theme='dark'] {
+    --color-background: var(--c-666666);
+    --color-text: var(--c-f2f2f2);
+    --color-header-background: var(--c-f2f2f2);
+    --color-menu-background: var(--c-003300);
+  }
+
+

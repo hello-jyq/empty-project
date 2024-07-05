@@ -1,0 +1,7 @@
+.layout .arco-select-view-single,.layout .arco-input-wrapper{
+    border-color: cadetblue;
+}
+
+.arco-tooltip-content {
+    color: var(--color-text) !important;
+  }
