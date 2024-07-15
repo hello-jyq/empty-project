@@ -4,9 +4,9 @@
     <div class="content">
       <Header class="header" />
       <router-view v-slot="{ Component }">
-        <keep-alive :include="keepAliveCache" :max="1">
-          <component :is="Component" />
-        </keep-alive>
+        <!-- <keep-alive :include="keepAliveCache"> -->
+        <component :is="Component" />
+        <!-- </keep-alive> -->
       </router-view>
       <!-- <router-view /> -->
     </div>
@@ -20,10 +20,10 @@ const Store = userStore()
 
 import Header from "./header.vue"
 import Menu from "./menu.vue"
-const keepAliveCache = computed(() => {
-  return ["help", "home"]
-  // return appStore.keepAlivePage
-})
+// const keepAliveCache = computed(() => {
+//   return ["/help", "/home"]
+//   // return appStore.keepAlivePage
+// })
 watch(
   () => Store.theme,
   () => {

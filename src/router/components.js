@@ -20,6 +20,10 @@ const ComponentList = [
     url: "/help", //ヘルプ
     component: () => import(/* webpackChunkName: "manage" */ "../views/help.vue"),
   },
+  {
+    url: "/thres", //ヘルプ
+    component: () => import(/* webpackChunkName: "manage" */ "../views/thres.vue"),
+  },
 ]
 
 export default ComponentList

@@ -271,7 +271,7 @@ export function addChildRoute(path, value) {
 let dynamicRoutes = []
 export function addDynamicMenuAndRoutes(menus) {
   menus = menus.filter((item) => {
-    return item.id?.indexOf("mcf-menu") === 0
+    return item.id?.indexOf("menu") === 0
   })
   router.removeRoute("root")
   dynamicRoutes = addDynamicRoutes(menus)

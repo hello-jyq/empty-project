@@ -10,7 +10,6 @@ const defaultLocale = Store.lang // localStorage.getItem("lang")
 const i18n = createI18n({
   locale: defaultLocale,
   fallbackLocale: "cn",
-  allowComposition: true,
   globalInjection: true,
   messages: {
     cn,
