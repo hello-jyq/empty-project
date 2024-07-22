@@ -29,27 +29,13 @@ import { computed, ref } from "vue"
 import { useRouter } from "vue-router"
 import { useMouse } from "@/utils/mouse"
 import { userStore } from "@/stores"
-const Store = userStore()
 const { x, y } = useMouse()
 const router = useRouter()
-const menus = ref([
-  { path: "/home", name: "首页", icon: "icon-shouye", level: "0" },
-  { path: "/help", name: "帮助", icon: "icon-bangzhu", level: "0" },
-  {
-    path: "/more",
-    name: "更多",
-    icon: "icon-weibiaoti--",
-    submenu: [
-      { path: "/add", name: "加", icon: "icon-jia", level: "1" },
-      { path: "/remove", name: "减", icon: "icon-jian", level: "1" },
-    ],
-  },
-])
 
 const menuTree = computed(() => {
   let appRoute = router.getRoutes().find((el) => el.name === "root")
   const copyRouter = JSON.parse(JSON.stringify(appRoute.children))
-  console.log(router.getRoutes(), copyRouter)
+  console.log(11, router.getRoutes(), copyRouter)
   return copyRouter
 })
 

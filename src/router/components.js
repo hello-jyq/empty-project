@@ -21,8 +21,8 @@ const ComponentList = [
     component: () => import(/* webpackChunkName: "manage" */ "../views/help.vue"),
   },
   {
-    url: "/thres", //ヘルプ
-    component: () => import(/* webpackChunkName: "manage" */ "../views/thres.vue"),
+    url: "/thress", //ヘルプ
+    component: () => import(/* webpackChunkName: "manage" */ "../views/thress.vue"),
   },
 ]
 

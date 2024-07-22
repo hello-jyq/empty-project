@@ -10,20 +10,20 @@
     </a-breadcrumb>
 
     <a-space align="center">
-      系统主题：
+      {{ $t("home.theme") }}：
       <a-select :style="{ width: '320px' }" v-model="theme" placeholder="选择主题" allow-clear>
         <a-option value="light">默认</a-option>
         <a-option value="dark">暗黑</a-option>
       </a-select>
     </a-space>
     <a-space align="center">
-      语言：
+      {{ $t("home.lang") }}：
       <a-select :style="{ width: '120px' }" v-model="lang" placeholder="选择语言" @change="changeLang" allow-clear>
         <a-option value="cn">中文</a-option>
         <a-option value="en">english</a-option>
       </a-select>
     </a-space>
-    <a-button @click="loginout">退出</a-button>
+    <a-button @click="loginout">{{ $t("home.logout") }}</a-button>
   </a-space>
 </template>
 <script setup>

@@ -3,6 +3,9 @@ export default {
   home: {
     title: "首页",
     date: "今天是{para}年",
+    theme: "系统主题",
+    lang: "语言",
+    logout: "退出",
   },
 
   msg: {

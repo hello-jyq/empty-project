@@ -3,6 +3,7 @@
     <Menu />
     <div class="content">
       <Header class="header" />
+
       <router-view v-slot="{ Component }">
         <!-- <keep-alive :include="keepAliveCache"> -->
         <component :is="Component" />

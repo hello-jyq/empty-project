@@ -116,9 +116,9 @@ let loginInfo = {
     },
     {
       id: "menu-thres",
-      resName: "thress学习",
+      resName: "thres学习",
       parentId: "",
-      resUrl: "/thres",
+      resUrl: "/thress",
       resFile: "/views/thres",
       resLevel: "0",
       displayOrder: 6,

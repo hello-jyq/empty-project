@@ -3,6 +3,9 @@ export default {
   home: {
     title: "home",
     date: "today is {para} year",
+    theme: "system theme",
+    lang: "language",
+    logout: "log out",
   },
 
   msg: {
