@@ -1,29 +1,30 @@
+// 配置页面路径
 const ComponentList = [
   {
-    url: "/home", //ホーム
+    url: "/home",
     component: () => import(/* webpackChunkName: "home" */ "../views/home.vue"),
   },
   {
-    url: "/mine/add", //我的-加
+    url: "/mine/add",
     component: () => import(/* webpackChunkName: "home" */ "../views/mine/add.vue"),
   },
   {
-    url: "/mine/add/detail", //我的-加
+    url: "/mine/add/detail",
     component: () => import(/* webpackChunkName: "home" */ "../views/mine/addDetail.vue"),
   },
 
   {
-    url: "/mine/remove", //我的-减
+    url: "/mine/remove",
     component: () => import(/* webpackChunkName: "home" */ "../views/mine/remove.vue"),
   },
   {
-    url: "/help", //ヘルプ
+    url: "/help",
     component: () => import(/* webpackChunkName: "manage" */ "../views/help.vue"),
   },
-  {
-    url: "/thress", //ヘルプ
-    component: () => import(/* webpackChunkName: "manage" */ "../views/thress.vue"),
-  },
+  // {
+  //   url: "/thress",
+  //   component: () => import(/* webpackChunkName: "manage" */ "../views/thress.vue"),
+  // },
 ]
 
 export default ComponentList

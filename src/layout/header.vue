@@ -18,7 +18,7 @@
     </a-space>
     <a-space align="center">
       {{ $t("home.lang") }}：
-      <a-select :style="{ width: '120px' }" v-model="lang" placeholder="选择语言" @change="changeLang" allow-clear>
+      <a-select :style="{ width: '120px' }" v-model="lang" placeholder="选择语言" @change="changeLang">
         <a-option value="cn">中文</a-option>
         <a-option value="en">english</a-option>
       </a-select>

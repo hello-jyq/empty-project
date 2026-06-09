@@ -1,15 +1,15 @@
 <template>
   <div class="layout">
     <Menu />
-    <div class="content">
+    <div class="container">
       <Header class="header" />
-
-      <router-view v-slot="{ Component }">
-        <!-- <keep-alive :include="keepAliveCache"> -->
-        <component :is="Component" />
-        <!-- </keep-alive> -->
-      </router-view>
-      <!-- <router-view /> -->
+      <div class="content_box">
+        <router-view v-slot="{ Component }">
+          <keep-alive :include="keepAliveCache">
+            <component :is="Component" />
+          </keep-alive>
+        </router-view>
+      </div>
     </div>
   </div>
 </template>
@@ -21,10 +21,11 @@ const Store = userStore()
 
 import Header from "./header.vue"
 import Menu from "./menu.vue"
-// const keepAliveCache = computed(() => {
-//   return ["/help", "/home"]
-//   // return appStore.keepAlivePage
-// })
+// 需要缓存的页面
+const keepAliveCache = computed(() => {
+  return ["/help", "/home"]
+  // return appStore.keepAlivePage
+})
 watch(
   () => Store.theme,
   () => {
@@ -36,28 +37,28 @@ watch(
 
 <style scoped>
 .layout {
-  width: 100vw;
-  height: 100vh;
-  min-width: 1600px;
+  width: 100%;
+  height: 100%;
   position: relative;
   display: flex;
 }
 
-.content {
-  flex: auto;
+.container {
+  flex: 1;
   height: 100%;
   background: var(--color-background);
-  margin: 0 auto;
   position: relative;
-}
-.layout_box {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
 }
 .header {
   height: 60px;
   width: 100%;
   background: var(--color-header-background);
   justify-content: space-between;
+}
+.content_box {
+  flex: 1;
+  overflow: auto;
 }
 </style>

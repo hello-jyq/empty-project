@@ -35,7 +35,6 @@ const router = useRouter()
 const menuTree = computed(() => {
   let appRoute = router.getRoutes().find((el) => el.name === "root")
   const copyRouter = JSON.parse(JSON.stringify(appRoute.children))
-  console.log(11, router.getRoutes(), copyRouter)
   return copyRouter
 })
 

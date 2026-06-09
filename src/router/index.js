@@ -6,7 +6,7 @@ import "nprogress/nprogress.css"
 import Layout from "@/layout/layout.vue"
 import ComponentList from "./components.js"
 import extRouters from "./ext-routers-config.js"
-NProgress.configure({ showSpinner: false }) // NProgress Configuration
+NProgress.configure({ showSpinner: false }) // 隐藏进度条旋转图标
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -26,44 +26,14 @@ const router = createRouter({
       name: "root",
       component: Layout,
       children: [
-        // {
-        //   path: "/home",
-        //   name: "Home",
-        //   meta: {
-        //     name: "首页",
-        //   },
-        //   component: () => import(/* webpackChunkName: "layout" */"@/views/home.vue"),
-        // },
-        // {
-        //   path: "/help",
-        //   name: "Help",
-        //   meta: {
-        //     name: "帮助",
-        //   },
-        //   component: () => import(/* webpackChunkName: "layout""@/views/help.vue"),
-        // },
-        // {
-        //   path: "/add",
-        //   name: "Add",
-        //   meta: {
-        //     name: "加",
-        //   },
-        //   component: () => import(/* webpackChunkName: "layout""@/views/add.vue"),
-        // },
-        // {
-        //   path: "/remove",
-        //   name: "Remove",
-        //   meta: {
-        //     name: "减",
-        //   },
-        //   component: () => import(/* webpackChunkName: "layout""@/views/remove.vue"),
-        // },
+        // 路由从缓存中获取
       ],
     },
   ],
 })
 
 router.beforeEach((to, from, next) => {
+  NProgress.start()
   const Store = userStore()
   const { menuList } = storeToRefs(Store)
   const rootRouter = router.getRoutes().filter((item) => {
@@ -118,7 +88,6 @@ router.beforeEach((to, from, next) => {
     }
   }
 })
-
 let lastNavbarHistory = []
 let isRootPage = true
 window.onpopstate = function () {
@@ -131,7 +100,9 @@ window.onpopstate = function () {
   }
   isRootPage = true
 }
+
 router.afterEach((to, from) => {
+  NProgress.done()
   const { menuList, navbarHistory, currentTabKey, storeOpenMenuKey } = storeToRefs(userStore())
   if ((from.path != "/" || (from.path == "/" && to.path == "/home")) && from.path?.length > 0) {
     if (to.path != "/" && to.path != from.path) {
@@ -165,6 +136,24 @@ router.afterEach((to, from) => {
   }
 })
 
+// 合并菜单路由
+export function addDynamicMenuAndRoutes(menus) {
+  menus = menus.filter((item) => {
+    return item.id?.indexOf("menu") === 0
+  })
+  router.removeRoute("root")
+  dynamicRoutes = addDynamicRoutes(menus)
+  router.addRoute({
+    name: "root",
+    path: "/",
+    component: Layout,
+    children: dynamicRoutes,
+  })
+
+  for (const [key, value] of Object.entries(extRouters)) {
+    addChildRoute(key, value)
+  }
+}
 function hasMenuPath(menuList, currentPath) {
   let has = false
   try {
@@ -187,10 +176,10 @@ function hasMenuPath(menuList, currentPath) {
   } catch (e) {}
   return has
 }
-
+// 创建所需的路由对象
 const creatOneRoute = (item) => {
   item.resFile = item.resFile?.replace(/^\//, "")
-  console.log(22222222222, item.resFile)
+
   var route = {
     path: item.resUrl,
     component: null,
@@ -215,6 +204,7 @@ const creatOneRoute = (item) => {
   return route
 }
 
+// 合并路由
 export function addDynamicRoutes(menuList = []) {
   let routes = []
   for (var i = 0; i < menuList.length; i++) {
@@ -236,6 +226,7 @@ export function addDynamicRoutes(menuList = []) {
   return routes
 }
 
+// 拼接自定义路由
 export function addChildRoute(path, value) {
   const existRouter = router.getRoutes().filter((item) => {
     return item.path === path
@@ -269,22 +260,5 @@ export function addChildRoute(path, value) {
   })
 }
 let dynamicRoutes = []
-export function addDynamicMenuAndRoutes(menus) {
-  menus = menus.filter((item) => {
-    return item.id?.indexOf("menu") === 0
-  })
-  router.removeRoute("root")
-  dynamicRoutes = addDynamicRoutes(menus)
-  router.addRoute({
-    name: "root",
-    path: "/",
-    component: Layout,
-    children: dynamicRoutes,
-  })
-
-  for (const [key, value] of Object.entries(extRouters)) {
-    addChildRoute(key, value)
-  }
-}
 
 export default router
