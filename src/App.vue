@@ -4,18 +4,32 @@
   </a-config-provider>
 </template>
 <script setup>
-import { computed } from "vue"
+import { computed, watch } from "vue"
+import { userStore } from "@/stores"
 import enUS from "@arco-design/web-vue/es/locale/lang/en-us"
 import zhCN from "@arco-design/web-vue/es/locale/lang/zh-cn"
-import jaJP from "@arco-design/web-vue/es/locale/lang/ja-jp"
+const store = userStore()
+watch(
+  () => store.lang,
+  (lang) => {
+    document.documentElement.lang = lang === "en" ? "en" : "zh-CN"
+  },
+  { immediate: true },
+)
+watch(
+  () => store.theme,
+  (theme) => {
+    document.body.setAttribute("theme", theme)
+    document.body.setAttribute("arco-theme", theme)
+  },
+  { immediate: true },
+)
 const locale = computed(() => {
-  switch (localStorage.lang) {
-    case "zh-CN":
+  switch (store.lang) {
+    case "cn":
       return zhCN
-    case "en-US":
+    case "en":
       return enUS
-    case "ja-JP":
-      return jaJP
     default:
       return zhCN
   }

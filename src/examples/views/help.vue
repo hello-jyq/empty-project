@@ -9,7 +9,7 @@
 </template>
 <script setup>
 import { ref, provide } from "vue"
-import ChildCompont from "@/components/helpChild.vue"
+import ChildCompont from "@/examples/components/helpChild.vue"
 
 const msg = ref("父传子")
 

@@ -2,7 +2,7 @@
   <h1>减</h1>
   <a-form :model="searchForm" label-align="left" :label-col-props="{ flex: '100px' }" :wrapper-col-props="{ flex: 'auto' }" class="head_form">
     <a-form-item label="表ID" field="id">
-      <a-select v-model="searchForm.id" allow-clear allow-search :placeholder="i18n.global.tc('msg.v002')">
+      <a-select v-model="searchForm.id" allow-clear allow-search :placeholder="i18n.global.t('msg.v002')">
         <a-option v-for="item in idOptions || []" :key="item.id" :value="item.id">{{ item.name }}</a-option>
         <template #arrow-icon>
           <icon-down style="font-size: large" />
@@ -10,7 +10,7 @@
       </a-select>
     </a-form-item>
     <a-form-item label="用户id" field="userId">
-      <a-select v-model="searchForm.userId" allow-clear allow-search :placeholder="i18n.global.tc('msg.v002')">
+      <a-select v-model="searchForm.userId" allow-clear allow-search :placeholder="i18n.global.t('msg.v002')">
         <a-option v-for="item in userIdOptions || []" :key="item.id" :value="item.id">{{ item.name }}</a-option>
         <template #arrow-icon>
           <icon-down style="font-size: large" />
@@ -18,12 +18,14 @@
       </a-select>
     </a-form-item>
     <a-form-item field="title" label="标题">
-      <a-input v-model="searchForm.title" :placeholder="i18n.global.tc('msg.v001')" allow-clear />
+      <a-input v-model="searchForm.title" :placeholder="i18n.global.t('msg.v001')" allow-clear />
     </a-form-item>
     <a-button type="primary" :loading="loading" @click="getApi">请求</a-button>
   </a-form>
+  <a-alert v-if="requestError" type="error">{{ requestError }}</a-alert>
+  <a-alert v-else-if="!requested" type="info">{{ i18n.global.t("example.requestHint") }}</a-alert>
 
-  <a-table :data="pageInfo" style="margin-top: 30px" :bordered="{ cell: true }" :size="'small'" :stripe="true">
+  <a-table :data="pageInfo" :loading="loading" style="margin-top: 30px" :bordered="{ cell: true }" :size="'small'" :stripe="true">
     <template #columns>
       <a-table-column title="userInfo">
         <a-table-column title="userId" data-index="userId"></a-table-column>
@@ -42,7 +44,7 @@
 <script setup>
 import { ref } from "vue"
 import { Modal } from "@arco-design/web-vue"
-import { requestPostTest } from "@/api/index"
+import { requestPostTest } from "@/api"
 import i18n from "@/local/index.js"
 const searchForm = ref({
   id: null,
@@ -70,6 +72,8 @@ const userIdOptions = ref([
 ])
 
 const pageInfo = ref([])
+const requested = ref(false)
+const requestError = ref("")
 const getApi = () => {
   // 检索结果下载
   Modal.info({
@@ -79,18 +83,26 @@ const getApi = () => {
     cancelText: "取消",
     hideCancel: false,
     titleAlign: "start",
-    onOk: () => {
+    onOk: async () => {
+      if (loading.value) {
+        return
+      }
+      requested.value = true
+      requestError.value = ""
       loading.value = true
-      requestPostTest(searchForm.value)
-        .then((res) => {
-          pageInfo.value = res
-        })
-        .catch((err) => {
-          pageInfo.value = err
-        })
-        .finally(() => {
-          loading.value = false
-        })
+      try {
+        const res = await requestPostTest(searchForm.value)
+        const rows = Array.isArray(res) ? res : res?.data?.list
+        if (!Array.isArray(rows)) {
+          throw new Error("Invalid post list response")
+        }
+        pageInfo.value = rows
+      } catch {
+        pageInfo.value = []
+        requestError.value = i18n.global.t("example.requestFailed")
+      } finally {
+        loading.value = false
+      }
     },
   })
 }

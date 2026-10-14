@@ -1,13 +1,13 @@
 
 @font-face {
     font-family: "AlegreyaSans-Bold";
-    src: url("./AlegreyaSans-Bold.woff") format("otf")
+    src: url("./AlegreyaSans-Bold.otf") format("opentype");
 }
 @font-face {
     font-family: "AlegreyaSans-Medium";
-    src: url("./AlegreyaSans-Medium.otf") format("otf")
+    src: url("./AlegreyaSans-Medium.otf") format("opentype");
 }
 @font-face {
     font-family: "AlegreyaSans-Regular";
-    src: url("./AlegreyaSans-Regular.otf") format("otf")
+    src: url("./AlegreyaSans-Regular.otf") format("opentype");
 }

@@ -1,12 +1,19 @@
 <template>
-  <a-tooltip :content="tip" :disabled="!tooltipDisabled" :align-point="true" :position="position" :show-arrow="showArrow" background-color="#ffffff">
+  <a-tooltip
+    :content="tip"
+    :disabled="!tooltipDisabled"
+    :align-point="alignPoint"
+    :position="position"
+    :show-arrow="showArrow"
+    background-color="#ffffff"
+  >
     <div
       ref="textElementRef"
       v-resize="domResize"
       class="ellipsis"
       :style="{
-        width: maxWidth + 'px',
-        height: maxHeight + 'px',
+        width: maxWidth == null ? undefined : maxWidth + 'px',
+        height: maxHeight == null ? undefined : maxHeight + 'px',
         lineClamp: lineClamp,
         WebkitLineClamp: lineClamp,
       }"
@@ -18,7 +25,7 @@
   </a-tooltip>
 </template>
 <script setup>
-import { ref, watch, toRefs, onMounted } from "vue"
+import { ref, watch, onMounted, nextTick } from "vue"
 const props = defineProps({
   // 提示文字
   tip: {
@@ -64,7 +71,6 @@ const props = defineProps({
 
 const textElementRef = ref(null)
 const tooltipDisabled = ref(false)
-const { tip } = toRefs(props)
 
 const compareSize = () => {
   const el = textElementRef.value
@@ -77,31 +83,20 @@ onMounted(() => {
 })
 
 watch(
-  () => tip.value,
-  () => {
-    setTimeout(() => {
-      compareSize()
-    })
+  () => [props.tip, props.maxWidth, props.maxHeight, props.lineClamp],
+  async () => {
+    await nextTick()
+    compareSize()
   },
-  { deep: true },
 )
 // 自定义指令
 const vResize = {
   mounted(el, binding) {
-    let width = 0
-    let height = 0
-    function isResize() {
-      const style = document.defaultView.getComputedStyle(el)
-      if (width !== style.width || height !== style.height) {
-        binding.value({ width: style.width, height: style.height })
-      }
-      width = style.width
-      height = style.height
-    }
-    el.__vueSetInterval__ = setInterval(isResize, 300)
+    el.__resizeObserver__ = new ResizeObserver(() => binding.value())
+    el.__resizeObserver__.observe(el)
   },
-  onMounted(el) {
-    clearInterval(el.__vueSetInterval__)
+  unmounted(el) {
+    el.__resizeObserver__.disconnect()
   },
 }
 

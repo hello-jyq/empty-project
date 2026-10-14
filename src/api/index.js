@@ -1,20 +1,6 @@
-import { getRequest, postRequest, downloadGet, downloadPost } from "./base/request"
-export const requestPostTest = (params) => {
-  return getRequest("/api/posts", params)
-}
+import { getRequest, postRequest } from "./base/request"
 
-export const requestApi1 = () => {
-  return getRequest("/api/crm/comm/mcflist")
-}
+// The examples keep their original endpoints outside the template's /api namespace.
+export const requestPostTest = (params) => getRequest("/devapi/posts", params, { baseURL: "/" })
 
-export const requestApi2 = ({ itemType, file }, progress = () => {}) => {
-  return postRequest(`/api/image/${itemType}/attachmentupload`, file, progress)
-}
-
-export const requestApi3 = (params) => {
-  return downloadGet(`/api/${params.funcDiv}/download/${params.id}`)
-}
-
-export const requestApi4 = (params) => {
-  return downloadPost("/api/crm/comm/download", params)
-}
+export const getUserList = (params) => postRequest("/localapi/user/list", params, { baseURL: "/" })

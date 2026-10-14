@@ -1,62 +1,92 @@
 <template>
-  <div class="menu_box">
-    <a-menu
-      :default-open-keys="[router.currentRoute.value?.path]"
-      :default-selected-keys="[router.currentRoute.value?.path]"
-      show-collapse-button
-      breakpoint="xl"
-    >
-      <template v-for="item in menuTree" :key="item.index">
-        <a-sub-menu v-if="item?.subMenu?.length > 0" :key="item.path">
-          <template #icon><i class="iconfont" :class="item.icon" /></template>
-          <template #title>{{ item.name }}</template>
-          <a-menu-item v-for="list in item.subMenu" :key="list.path" @click="goto(list)">
-            <template #icon><i class="iconfont" :class="list.icon" /></template>
-            {{ list.name }}
+  <nav class="menu" :aria-label="$t('app.navigation')">
+    <div class="brand">{{ $t("app.name") }}</div>
+    <a-menu v-model:open-keys="openKeys" :selected-keys="selectedKeys">
+      <template v-for="item in menuItems" :key="item.path">
+        <a-sub-menu v-if="item.children.length" :key="item.path" :title="$t(item.titleKey)">
+          <template #icon><span class="menu-mark" aria-hidden="true" /></template>
+          <a-menu-item v-for="child in item.children" :key="child.path" @click="router.push(child.path)">
+            {{ $t(child.titleKey) }}
           </a-menu-item>
         </a-sub-menu>
-        <a-menu-item v-else-if="item?.meta?.level === '0'" @click="goto(item)" :key="item.path">
-          <template #icon><i class="iconfont" :class="item.icon" /></template>
-          {{ item.name }}
+        <a-menu-item v-else :key="item.path" @click="router.push(item.path)">
+          <template #icon><span class="menu-mark" aria-hidden="true" /></template>
+          {{ $t(item.titleKey) }}
         </a-menu-item>
       </template>
-      <div style="margin-top: 60px">鼠标位置: {{ x }}, {{ y }}</div>
     </a-menu>
-  </div>
+  </nav>
 </template>
+
 <script setup>
-import { computed, ref } from "vue"
-import { useRouter } from "vue-router"
-import { useMouse } from "@/utils/mouse"
-import { userStore } from "@/stores"
-const { x, y } = useMouse()
+import { computed, ref, watch } from "vue"
+import { useRoute, useRouter } from "vue-router"
+import { appRoutes } from "@/router"
+
 const router = useRouter()
-
-const menuTree = computed(() => {
-  let appRoute = router.getRoutes().find((el) => el.name === "root")
-  const copyRouter = JSON.parse(JSON.stringify(appRoute.children))
-  return copyRouter
+const route = useRoute()
+const openKeys = ref([])
+const toMenuItem = (item) => ({
+  name: item.name,
+  path: router.resolve({ name: item.name }).path,
+  titleKey: item.meta.titleKey,
 })
-
-const goto = (item) => {
-  router.push({
-    path: item.path,
-  })
-}
+const menuItems = appRoutes
+  .filter((item) => item.meta?.menu)
+  .map((item) => ({
+    ...toMenuItem(item),
+    children: (item.children || []).filter((child) => child.meta?.menu).map(toMenuItem),
+  }))
+const selectedKeys = computed(() => {
+  const selectedRoute = [...route.matched].reverse().find((record) => record.meta.menu)
+  return selectedRoute ? [router.resolve({ name: selectedRoute.name }).path] : []
+})
+watch(
+  () => route.path,
+  () => {
+    const parent = menuItems.find((item) => item.children.length && route.matched.some((record) => record.name === item.name))
+    if (parent && !openKeys.value.includes(parent.path)) {
+      openKeys.value = [...openKeys.value, parent.path]
+    }
+  },
+  { immediate: true },
+)
 </script>
+
 <style scoped>
-.menu_box {
-  box-sizing: border-box;
-  max-width: 200px;
-  height: 100%;
-}
-.menu_box .arco-menu-light {
+.menu {
+  width: 200px;
+  min-height: 100%;
   background: var(--color-menu-background);
+  border-right: 1px solid var(--color-border);
 }
-.menu_box .arco-menu {
-  height: 100%;
+.brand {
+  height: 64px;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  font-size: 18px;
+  font-weight: 600;
 }
-.menu_box .arco-menu-item {
-  width: 150px;
+.menu-mark {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.menu :deep(.arco-menu) {
+  background: transparent;
+}
+@media (max-width: 680px) {
+  .menu {
+    width: 100%;
+    min-height: 0;
+    border-right: 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .brand {
+    height: 52px;
+  }
 }
 </style>

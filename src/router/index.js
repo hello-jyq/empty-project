@@ -1,264 +1,77 @@
 import { createRouter, createWebHistory } from "vue-router"
-import { userStore } from "@/stores"
-import { storeToRefs } from "pinia"
-import NProgress from "nprogress" // progress bar
-import "nprogress/nprogress.css"
-import Layout from "@/layout/layout.vue"
-import ComponentList from "./components.js"
-import extRouters from "./ext-routers-config.js"
-NProgress.configure({ showSpinner: false }) // 隐藏进度条旋转图标
+import { pinia, userStore } from "@/stores"
+
+export const appRoutes = [
+  {
+    path: "home",
+    name: "home",
+    meta: { titleKey: "home.title", menu: true },
+    component: () => import("@/views/home.vue"),
+  },
+  {
+    path: "examples",
+    name: "examples",
+    meta: { titleKey: "app.examples", menu: true },
+    redirect: "/examples/help",
+    children: [
+      { path: "help", name: "example-help", meta: { titleKey: "example.help", menu: true }, component: () => import("@/examples/views/help.vue") },
+      {
+        path: "users",
+        name: "example-users",
+        meta: { titleKey: "example.users", menu: true },
+        component: () => import("@/examples/views/userList.vue"),
+      },
+      {
+        path: "mine/add",
+        name: "example-add",
+        meta: { titleKey: "example.add", menu: true },
+        component: () => import("@/examples/views/mine/add.vue"),
+      },
+      {
+        path: "mine/add/detail",
+        name: "example-add-detail",
+        meta: { titleKey: "example.addDetail", menu: true },
+        component: () => import("@/examples/views/mine/addDetail.vue"),
+      },
+      {
+        path: "mine/remove",
+        name: "example-remove",
+        meta: { titleKey: "example.remove", menu: true },
+        component: () => import("@/examples/views/mine/remove.vue"),
+      },
+    ],
+  },
+  {
+    path: ":pathMatch(.*)*",
+    name: "not-found",
+    meta: { titleKey: "app.notFound" },
+    component: () => import("@/views/notFound.vue"),
+  },
+]
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    {
-      path: "/login",
-      name: "Login",
-      meta: {
-        name: "登陆",
-
-        requiresAuth: false,
-      },
-      component: () => import("@/views/login.vue"),
-    },
+    { path: "/login", name: "login", component: () => import("@/views/login.vue") },
     {
       path: "/",
-      name: "root",
-      component: Layout,
-      children: [
-        // 路由从缓存中获取
-      ],
+      component: () => import("@/layout/layout.vue"),
+      redirect: "/home",
+      children: appRoutes,
     },
   ],
 })
 
-router.beforeEach((to, from, next) => {
-  NProgress.start()
-  const Store = userStore()
-  const { menuList } = storeToRefs(Store)
-  const rootRouter = router.getRoutes().filter((item) => {
-    return item.name === "root"
-  })[0]
-  if (to.path === "/login") {
-    next()
-  } else {
-    if (localStorage.getItem("loginStatus") === "yes") {
-      if (Store.token?.length > 1) {
-        if (to.path !== "/login" && !rootRouter.children?.length > 0) {
-          if (menuList.value?.length > 0) {
-            addDynamicMenuAndRoutes(menuList.value)
-
-            router
-              .push({
-                name: "root",
-              })
-              .then(() => {
-                if (to.path == "/") {
-                  router.push({
-                    path: "/home",
-                    query: to.query,
-                  })
-                } else {
-                  router.push({
-                    path: to.path,
-                    query: to.query,
-                  })
-                }
-              })
-          } else {
-            localStorage.setItem("loginStatus", "no")
-            localStorage.removeItem("token")
-            next({
-              path: "/login",
-            })
-          }
-        } else {
-          next()
-        }
-      } else if (to.path !== "/login") {
-        next({
-          path: "/login",
-        })
-      } else {
-        next()
-      }
-    } else {
-      // 该用户未登录，跳转到登入页面
-      window.location.href = window.location.protocol + "//" + window.location.host + "/login"
-    }
+router.beforeEach((to) => {
+  if (import.meta.env.VITE_AUTH_ENABLED !== "true" || to.name === "login") {
+    return true
   }
+
+  if (userStore(pinia).token) {
+    return true
+  }
+
+  return { name: "login", query: { redirect: to.fullPath } }
 })
-let lastNavbarHistory = []
-let isRootPage = true
-window.onpopstate = function () {
-  const Store = userStore()
-  const { navbarHistory } = storeToRefs(Store)
-  if (lastNavbarHistory?.length > 2 && !isRootPage) {
-    navbarHistory.value = lastNavbarHistory[lastNavbarHistory?.length - 3]
-    lastNavbarHistory.pop()
-    lastNavbarHistory.pop()
-  }
-  isRootPage = true
-}
-
-router.afterEach((to, from) => {
-  NProgress.done()
-  const { menuList, navbarHistory, currentTabKey, storeOpenMenuKey } = storeToRefs(userStore())
-  if ((from.path != "/" || (from.path == "/" && to.path == "/home")) && from.path?.length > 0) {
-    if (to.path != "/" && to.path != from.path) {
-      navbarHistory.value = [
-        { path: from.path, name: from.name, query: from.query },
-        { path: to.path, name: to.name, query: to.query },
-      ]
-      lastNavbarHistory.push(navbarHistory.value)
-    }
-  }
-  if (to.path === "/login") {
-    navbarHistory.value = []
-    lastNavbarHistory = []
-  }
-  let tabList = []
-  dynamicRoutes.forEach((element) => {
-    if (to.path?.indexOf(element.path) != -1) {
-      if (hasMenuPath(menuList.value, element.path)) {
-        tabList.push(element.path)
-      }
-      if (element.path?.lastIndexOf("/") > 0) {
-        const idx = element.path?.lastIndexOf("/")
-        if (idx > 0) {
-          storeOpenMenuKey.value = [element.path?.substring(0, idx)]
-        }
-      }
-    }
-  })
-  if (tabList?.length > 0) {
-    currentTabKey.value = tabList
-  }
-})
-
-// 合并菜单路由
-export function addDynamicMenuAndRoutes(menus) {
-  menus = menus.filter((item) => {
-    return item.id?.indexOf("menu") === 0
-  })
-  router.removeRoute("root")
-  dynamicRoutes = addDynamicRoutes(menus)
-  router.addRoute({
-    name: "root",
-    path: "/",
-    component: Layout,
-    children: dynamicRoutes,
-  })
-
-  for (const [key, value] of Object.entries(extRouters)) {
-    addChildRoute(key, value)
-  }
-}
-function hasMenuPath(menuList, currentPath) {
-  let has = false
-  try {
-    menuList.forEach((menu) => {
-      if (menu.id?.length > 0) {
-        if (menu.children?.length > 0) {
-          menu.children.forEach((subMenu) => {
-            if (currentPath == subMenu.resUrl) {
-              has = true
-              throw "Break"
-            }
-          })
-        } else {
-          if (currentPath == menu.resUrl) {
-            has = true
-          }
-        }
-      }
-    })
-  } catch (e) {}
-  return has
-}
-// 创建所需的路由对象
-const creatOneRoute = (item) => {
-  item.resFile = item.resFile?.replace(/^\//, "")
-
-  var route = {
-    path: item.resUrl,
-    component: null,
-    name: item.resName,
-    icon: item.icon,
-    sortNo: item.displayOrder,
-    meta: {
-      level: item.resLevel,
-    },
-  }
-  let oneComponent = {}
-  try {
-    ComponentList.forEach((oneComp) => {
-      if (oneComp.url == item.resUrl) {
-        oneComponent = oneComp.component
-        throw "Break"
-      }
-    })
-    // eslint-disable-next-line no-empty
-  } catch (error) {}
-  route["component"] = oneComponent
-  return route
-}
-
-// 合并路由
-export function addDynamicRoutes(menuList = []) {
-  let routes = []
-  for (var i = 0; i < menuList.length; i++) {
-    if (menuList[i].children?.length > 0 && menuList[i].children.length >= 1) {
-      const route = creatOneRoute(menuList[i])
-      let temp = []
-      for (var idx = 0; idx < menuList[i].children.length; idx++) {
-        const childRoute = creatOneRoute(menuList[i].children[idx])
-        temp.push(childRoute)
-        routes.push(childRoute)
-      }
-      route.subMenu = temp
-      routes.push(route)
-    } else if (menuList[i].resUrl && /\S/.test(menuList[i].resUrl)) {
-      const route = creatOneRoute(menuList[i])
-      routes.push(route)
-    }
-  }
-  return routes
-}
-
-// 拼接自定义路由
-export function addChildRoute(path, value) {
-  const existRouter = router.getRoutes().filter((item) => {
-    return item.path === path
-  })
-  if (existRouter?.length > 0) {
-    return
-  }
-  const { menuList } = storeToRefs(userStore())
-  let newMenuList = [].concat(menuList.value)
-  newMenuList.push({
-    resFile: value.filePath,
-    resUrl: path,
-    resName: value.name,
-  })
-  menuList.value = newMenuList
-  let oneComponent = {}
-  try {
-    ComponentList.forEach((oneComp) => {
-      if (oneComp.url == path) {
-        oneComponent = oneComp.component
-        throw "Break"
-      }
-    })
-  } catch (error) {
-    console.log(111, error)
-  }
-  router.addRoute("root", {
-    path: path,
-    name: value.name,
-    component: oneComponent,
-  })
-}
-let dynamicRoutes = []
 
 export default router
